@@ -1,0 +1,15 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'cz.liftago.ui.strings'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 33
+    }
+}
+
+// No Deps!!

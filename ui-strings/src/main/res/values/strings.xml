@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Steam Thresher</string>
+
+    <string name="title_default">Default Action</string>
+
+    <string name="title_feature_activity">Feature Activity</string>
+    <string name="title_feature_compose">Feature Compose</string>
+    <string name="title_feature_fragment">Feature Fragment</string>
+
+    <string name="action_notify">notify()</string>
+    <string name="action_navigate">navigate()</string>
+    <string name="action_finish">finishFragment()</string>
+
+    <string name="hello_blank_fragment">Hello Blank Fragment</string>
+</resources>

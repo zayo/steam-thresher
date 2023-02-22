@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cz.liftago.core.navigation">
+
+    <application>
+        <receiver
+            android:name=".internal.NavigatorBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" />
+    </application>
+</manifest>
