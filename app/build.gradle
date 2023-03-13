@@ -33,38 +33,36 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.majorVersion
-    }
     buildFeatures {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.3.2'
+        kotlinCompilerExtensionVersion '1.4.3'
     }
-    packagingOptions {
-        resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-        }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlin {
+        jvmToolchain(JavaVersion.VERSION_11.majorVersion.toInteger())
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
     }
 }
 
 dependencies {
 
-    implementation project(":core")
-    implementation project(":feature-activity")
-    implementation project(":feature-fragment")
-    implementation project(":feature-compose")
+    implementation project(':core')
+    implementation project(':feature-activity')
+    implementation project(':feature-fragment')
+    implementation project(':feature-compose')
     implementation project(':ui-strings')
 
-    implementation project(":ui-theme")
+    implementation project(':ui-theme')
 
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.0'
     implementation 'androidx.fragment:fragment-ktx:1.5.5'
     implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
 

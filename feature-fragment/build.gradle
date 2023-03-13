@@ -18,6 +18,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    kotlin {
+        jvmToolchain(JavaVersion.VERSION_11.majorVersion.toInteger())
+    }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.majorVersion
     }
@@ -27,8 +30,8 @@ dependencies {
 
     implementation project(':core')
     implementation project(':ui-strings')
-    implementation project(":ui-components")
-    implementation project(":ui-theme")
+    implementation project(':ui-components')
+    implementation project(':ui-theme')
 
     implementation "com.google.dagger:hilt-android:2.45"
     kapt "com.google.dagger:hilt-compiler:2.45"
