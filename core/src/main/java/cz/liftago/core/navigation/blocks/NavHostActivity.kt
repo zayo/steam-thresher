@@ -96,6 +96,7 @@ abstract class NavHostActivity : FragmentActivity(R.layout.activity_fragment_con
              */
             else -> {
                 supportFragmentManager.commit {
+                    setReorderingAllowed(true)
                     replace(R.id.fragment_container_view, createNew())
                         .addToBackStack(action::class.simpleName)
                 }
