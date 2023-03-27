@@ -1,4 +1,4 @@
-package cz.liftago.feature.compose
+package cz.liftago.feature.dfault
 
 import cz.liftago.core.demo.ActionsEnumerator
 import cz.liftago.core.demo.Notificator

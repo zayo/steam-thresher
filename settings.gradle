@@ -12,7 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Steam Thresher"
+rootProject.name = 'Steam Thresher'
 
 include ':app'
 
@@ -20,8 +20,9 @@ include ':core'
 include ':core-navigation'
 
 include ':feature-activity'
-include ':feature-fragment'
+include ':feature-dfault'
 include ':feature-compose'
+include ':feature-fragment'
 
 include ':ui-components'
 include ':ui-strings'

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace 'cz.liftago.feature.fragment'
+    namespace 'cz.liftago.feature.dfault'
     compileSdk 33
 
     defaultConfig {
@@ -14,30 +14,43 @@ android {
         targetSdk 33
     }
 
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.3'
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-    kotlin {
-        jvmToolchain(JavaVersion.VERSION_11.majorVersion.toInteger())
-    }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.majorVersion
+    }
+    kotlin {
+        jvmToolchain(JavaVersion.VERSION_11.majorVersion.toInteger())
     }
 }
 
 dependencies {
 
     implementation project(':core')
-    implementation project(':ui-strings')
     implementation project(':ui-components')
+    implementation project(':ui-strings')
     implementation project(':ui-theme')
 
     implementation 'com.google.dagger:hilt-android:2.45'
     kapt 'com.google.dagger:hilt-compiler:2.45'
 
+    implementation platform('androidx.compose:compose-bom:2023.01.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.ui:ui-viewbinding'
+    implementation 'androidx.compose.material3:material3'
+
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'com.google.android.material:material:1.8.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.5'
+
     testImplementation 'junit:junit:4.13.2'
 }
