@@ -16,6 +16,7 @@ import cz.liftago.core.navigation.utils.hasNavigationAction
 import cz.liftago.core.navigation.utils.putNavigationAction
 import cz.liftago.core.navigation.utils.requireNavigationAction
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
 /**
  * Base class providing internal navigation supporting multiple [NavHostFragment]s inside.
@@ -77,7 +78,7 @@ abstract class NavHostActivity : FragmentActivity(R.layout.activity_fragment_con
                     supportFragmentManager.popBackStackImmediate()
                 }
                 supportFragmentManager.commitNow {
-                    replace(R.id.fragment_container_view, createNew())
+                    replace(R.id.fragment_container_view, createNew(), handlingFragmentClass.tag)
                 }
             }
 
@@ -97,7 +98,7 @@ abstract class NavHostActivity : FragmentActivity(R.layout.activity_fragment_con
             else -> {
                 supportFragmentManager.commit {
                     setReorderingAllowed(true)
-                    replace(R.id.fragment_container_view, createNew())
+                    replace(R.id.fragment_container_view, createNew(), handlingFragmentClass.tag)
                         .addToBackStack(action::class.simpleName)
                 }
             }
@@ -120,11 +121,39 @@ abstract class NavHostActivity : FragmentActivity(R.layout.activity_fragment_con
             } else {
                 finish()
             }
-        } else {
-            supportFragmentManager.popBackStack()
-            if (result != null) {
-                delegateInternal(action = result)
+        } else if (result != null) {
+            val handlingClass = manager.findActionHandler(result)
+            val handlingFragmentOnBackStack =
+                supportFragmentManager.findFragmentByTag(handlingClass.tag)
+
+            if (handlingFragmentOnBackStack != null) {
+                // The fragment handling the action is already in hierarchy
+                // PopUpTo is applied.
+                // This basically makes sure the handling fragment will be on top, thus no new
+                // handling fragment is created.
+
+                if (supportFragmentManager.fragments.last()::class == handlingClass) {
+                    error(
+                        "Calling finishFragment() from actionHandler: " +
+                                "'${handlingClass.tag}' with '$result' is forbidden " +
+                                "because the action suppose to be handled by the same " +
+                                "'${handlingClass.tag}'. Use the navigate($result) instead."
+                    )
+                }
+                do {
+                    supportFragmentManager.popBackStackImmediate()
+                } while (supportFragmentManager.fragments.last()::class != handlingClass)
+            } else {
+                // No handler yet, finish current, navigate to new action (forward).
+                supportFragmentManager.popBackStack()
             }
+            delegateInternal(action = result)
+        } else {
+            // No result, simply pop back stack.
+            supportFragmentManager.popBackStack()
         }
     }
+
+    private val KClass<*>.tag: String
+        get() = requireNotNull(qualifiedName)
 }

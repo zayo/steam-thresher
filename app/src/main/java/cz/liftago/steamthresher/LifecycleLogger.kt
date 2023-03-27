@@ -7,7 +7,7 @@ import android.util.Log
 
 internal class LifecycleLogger : Application.ActivityLifecycleCallbacks {
     private fun log(method: String, activity: Activity, bundle: Bundle? = null) {
-        Log.d("LIFECYCLE", "${activity.localClassName}.$method(bundle:$bundle)")
+        Log.d("AppLifecycle", "${activity.localClassName}.$method(bundle:$bundle)")
     }
 
     override fun onActivityCreated(activity: Activity, bundle: Bundle?) =
