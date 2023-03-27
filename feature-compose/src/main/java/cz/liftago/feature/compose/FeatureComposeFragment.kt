@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +20,8 @@ import cz.liftago.core.navigation.actions.FeatureComposeInnerAction1
 import cz.liftago.core.navigation.actions.FeatureComposeInnerAction2
 import cz.liftago.core.navigation.actions.FeatureComposeInnerAction3
 import cz.liftago.core.navigation.blocks.NavHostComposeFragment
+import cz.liftago.feature.compose.viewmodel.FeatureViewModel
+import cz.liftago.feature.compose.viewmodel.RootViewModel
 import cz.liftago.ui.components.Toolbar
 import cz.liftago.ui.strings.R
 import cz.liftago.ui.theme.withThemedContent
@@ -48,19 +52,26 @@ class FeatureComposeFragment : NavHostComposeFragment() {
                     startDestination = "root"
                 ) {
                     composable("root") { entry ->
-                        FeatureCompose(navigator, navController.backQueue, entry)
+                        val parentEntry = remember(entry) {
+                            navController.getBackStackEntry("root")
+                        }
+                        val viewModel: RootViewModel = hiltViewModel(parentEntry)
+                        FeatureCompose(viewModel, navController.backQueue, entry)
                     }
 
                     composable("first/{arg}") { entry ->
-                        FeatureCompose(navigator, navController.backQueue, entry)
+                        val viewModel: FeatureViewModel = hiltViewModel()
+                        FeatureCompose(viewModel, navController.backQueue, entry)
                     }
 
                     composable("second/{arg}") { entry ->
-                        FeatureCompose(navigator, navController.backQueue, entry)
+                        val viewModel: FeatureViewModel = hiltViewModel()
+                        FeatureCompose(viewModel, navController.backQueue, entry)
                     }
 
                     composable("third/{arg}") { entry ->
-                        FeatureCompose(navigator, navController.backQueue, entry)
+                        val viewModel: FeatureViewModel = hiltViewModel()
+                        FeatureCompose(viewModel, navController.backQueue, entry)
                     }
                 }
             }

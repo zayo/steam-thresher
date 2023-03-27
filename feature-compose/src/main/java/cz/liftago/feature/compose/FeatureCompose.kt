@@ -2,6 +2,8 @@ package cz.liftago.feature.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,15 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import cz.liftago.core.navigation.Navigator
 import cz.liftago.core.navigation.actions.FeatureComposeAction
 import cz.liftago.core.navigation.actions.FeatureComposeInnerAction1
 import cz.liftago.core.navigation.actions.FeatureComposeInnerAction2
 import cz.liftago.core.navigation.actions.FeatureComposeInnerAction3
+import cz.liftago.feature.compose.viewmodel.FeatureComposeViewModel
 
 @Composable
 internal fun FeatureCompose(
-    navigator: Navigator,
+    viewModel: FeatureComposeViewModel,
     backQueue: ArrayDeque<NavBackStackEntry>,
     currentEntry: NavBackStackEntry
 ) {
@@ -33,16 +35,16 @@ internal fun FeatureCompose(
     fun origin() = backQueue.last().destination.route?.normalize() ?: "unknown"
     Column {
         NavButton(text = "FeatureComposeAction(root)") {
-            navigator.navigate(FeatureComposeAction)
+            viewModel.navigate(FeatureComposeAction)
         }
-        NavButton(text = "FeatureComposeInnerAction1") {
-            navigator.navigate(FeatureComposeInnerAction1(origin()))
+        NavButton(text = "FeatureComposeInnerAction1(first)") {
+            viewModel.navigate(FeatureComposeInnerAction1(origin()))
         }
-        NavButton(text = "FeatureComposeInnerAction2") {
-            navigator.navigate(FeatureComposeInnerAction2(origin()))
+        NavButton(text = "FeatureComposeInnerAction2(second)") {
+            viewModel.navigate(FeatureComposeInnerAction2(origin()))
         }
-        NavButton(text = "FeatureComposeInnerAction3") {
-            navigator.navigate(FeatureComposeInnerAction3(origin()))
+        NavButton(text = "FeatureComposeInnerAction3(third)") {
+            viewModel.navigate(FeatureComposeInnerAction3(origin()))
         }
 
         Text(
@@ -59,16 +61,17 @@ internal fun FeatureCompose(
             LazyColumn {
                 itemsIndexed(backQueue) { index, item ->
                     if (index == currentEntryPosition) {
-                        Text(
-                            text = item.destination.route ?: "<empty>",
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(color = Color(0x548BC34A))
-                        )
+                        ) {
+                            Text(text = item.destination.route ?: "<EndOfStack>")
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(text = viewModel.identity)
+                        }
                     } else {
-                        Text(
-                            text = item.destination.route ?: "<empty>"
-                        )
+                        Text(text = item.destination.route ?: "<EndOfStack>")
                     }
                 }
             }
