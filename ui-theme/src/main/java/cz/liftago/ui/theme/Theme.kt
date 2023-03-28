@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
 import androidx.compose.ui.unit.LayoutDirection
 import com.google.accompanist.themeadapter.material3.createMdc3Theme
 
@@ -99,12 +100,10 @@ fun PreviewTheme(
 }
 
 fun ComposeView.withThemedContent(
-    disposeOnDestroy: Boolean = true,
+    disposeStrategy: ViewCompositionStrategy = DisposeOnViewTreeLifecycleDestroyed,
     content: @Composable () -> Unit
 ): ComposeView = apply {
-    if (disposeOnDestroy) {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-    }
+    setViewCompositionStrategy(disposeStrategy)
     setContent {
         UiTheme(content = content)
     }

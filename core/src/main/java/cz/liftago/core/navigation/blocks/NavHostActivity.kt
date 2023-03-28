@@ -78,6 +78,7 @@ abstract class NavHostActivity : FragmentActivity(R.layout.activity_fragment_con
                     supportFragmentManager.popBackStackImmediate()
                 }
                 supportFragmentManager.commitNow {
+                    setReorderingAllowed(true)
                     replace(R.id.fragment_container_view, createNew(), handlingFragmentClass.tag)
                 }
             }

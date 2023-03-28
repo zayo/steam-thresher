@@ -1,8 +1,11 @@
 package cz.liftago.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cz.liftago.ui.strings.R
@@ -15,6 +18,7 @@ fun DemoLayout(
     finish: (Int) -> Unit,
 ) {
     Column(
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         DropdownWithButton(

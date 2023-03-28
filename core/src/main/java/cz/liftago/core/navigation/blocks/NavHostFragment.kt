@@ -1,9 +1,11 @@
 package cz.liftago.core.navigation.blocks
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import androidx.transition.Slide
 import cz.liftago.core.navigation.Action
 import cz.liftago.core.navigation.Args
 import cz.liftago.core.navigation.Navigator
@@ -51,11 +53,27 @@ abstract class NavHostFragment(@LayoutRes contentLayoutId: Int) : Fragment(conte
     @Inject
     lateinit var navigator: Navigator
 
+    protected open val useDefaultTransition: Boolean
+        get() = true
+
     protected val fragmentNavigator: FragmentNavigator by lazy {
         // Compose self with Navigator instance.
         object : FragmentNavigator, Navigator by navigator {
             override fun finishFragment(action: Action<Args>?) =
                 this@NavHostFragment.finishFragment(action)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (useDefaultTransition) {
+            enterTransition = Slide(Gravity.RIGHT).apply { duration = 300L }
+            exitTransition = Slide(Gravity.LEFT).apply { duration = 300L }
+            reenterTransition = Slide(Gravity.LEFT).apply { duration = 300L }
+            returnTransition = Slide(Gravity.RIGHT).apply { duration = 300L }
+            allowEnterTransitionOverlap = true
+            allowReturnTransitionOverlap = true
         }
     }
 
