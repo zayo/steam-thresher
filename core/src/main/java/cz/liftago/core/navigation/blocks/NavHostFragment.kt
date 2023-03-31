@@ -68,10 +68,18 @@ abstract class NavHostFragment(@LayoutRes contentLayoutId: Int) : Fragment(conte
         super.onCreate(savedInstanceState)
 
         if (useDefaultTransition) {
-            enterTransition = Slide(Gravity.RIGHT).apply { duration = 300L }
-            exitTransition = Slide(Gravity.LEFT).apply { duration = 300L }
-            reenterTransition = Slide(Gravity.LEFT).apply { duration = 300L }
-            returnTransition = Slide(Gravity.RIGHT).apply { duration = 300L }
+            enterTransition = Slide(Gravity.RIGHT).apply {
+                duration = 150L
+            }
+            exitTransition = Slide(Gravity.LEFT).apply {
+                duration = 150L
+            }
+            reenterTransition = Slide(Gravity.LEFT).apply {
+                duration = 150L
+            }
+            returnTransition = Slide(Gravity.RIGHT).apply {
+                duration = 150L
+            }
             allowEnterTransitionOverlap = true
             allowReturnTransitionOverlap = true
         }

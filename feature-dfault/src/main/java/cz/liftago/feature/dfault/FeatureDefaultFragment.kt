@@ -48,9 +48,7 @@ class FeatureDefaultFragment : NavHostComposeFragment() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Toolbar(title = stringResource(id = action.title())) {
-                        fragmentNavigator.finishFragment()
-                    }
+                    Toolbar(title = stringResource(id = action.title()), withBack = false) {}
 
                     val viewModel = createViewModel(action)
 

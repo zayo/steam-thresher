@@ -9,11 +9,15 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar(title: String, onBack:()->Unit)  {
+fun Toolbar(title: String, withBack: Boolean = true, onBack: () -> Unit) {
     Surface(shadowElevation = 4.dp) {
         TopAppBar(
             title = { Text(text = title) },
-            navigationIcon = { BackButton(onClick = onBack) }
+            navigationIcon = {
+                if (withBack) {
+                    BackButton(onClick = onBack)
+                }
+            }
         )
     }
 }

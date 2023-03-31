@@ -57,13 +57,15 @@ abstract class NavHostComposeFragment : NavHostFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View = ComposeView(requireContext()).apply {
         onCreateCompose(_action.asStateFlow())
     }
 
     /**
-     *
+     * Provides a [ComposeView] as a receiver this method will be called on.
+     * This suppose to provide a compose view by calling [ComposeView.setContent].
+     * The provided [actions] will be used for receiving new actions within this [ActionHandler].
      */
     abstract fun ComposeView.onCreateCompose(actions: StateFlow<Action<Args>>)
 
