@@ -1,4 +1,4 @@
-# [Steam Thresher] (https://en.wikipedia.org/wiki/Threshing_machine)
+# Steam Thresher  [wiki](https://en.wikipedia.org/wiki/Threshing_machine)
 
 PoC for https://liftago.atlassian.net/browse/LTG-18055 and https://liftago.atlassian.net/browse/LTG-18097
 
@@ -18,14 +18,14 @@ graph TD;
     feature-->core
 ```
 
-### :core-navigation
+### `:core-navigation`
 `:core-navigation` module defines the basic structure of `Navigator`, `Action`, `Args` and 
 `ActionDelegate`. The types other modules will depend on when navigating. 
 On the inner level it also implements notification to action transformation.
 
 This module is meant to be only propagated by the `:core` as it serves no real purpose on its own.
 
-### :core
+### `:core`
 This module provides a basic implementation of `:core-navigation` interfaces (especially in `blocks`
 package). And further defines more granular structures such as `ActionHandler`.
 `:core` module is also a host for the actual `Action` and `Args` implementations.
@@ -39,15 +39,15 @@ features to navigate to other features without exact knowledge how they are impl
 > It's also worth to mention that while `Navigator` can be used to navigate to other features, it 
 > should be used for the navigation within the module as well. So any view should not change 
 > internal >state of the feature module directly, but rather through `Navigator` with **Top-Bottom** 
-> breakdown. This is also known as [**unidirectional data flow**] (https://en.wikipedia.org/wiki/Unidirectional_Data_Flow_(computer_science)) 
+> breakdown. This is also known as [**unidirectional data flow**](https://en.wikipedia.org/wiki/Unidirectional_Data_Flow_(computer_science)) 
 
-### :feature
+### `:feature`
 Is the actual place, where all the business related code should sit. Apart from a specifics to 
 implementation of the `NavHostFragmet`, there are no restrictions.
 
 From the dependency perspective this **must** depend on the `:core`.
 
-### :app
+### `:app`
 The last module that defines how to put all previous together. It gives the actual implementations 
 of all the abstraction from `:core`, `:core-navigation` and `:feature` and connects them to one 
 functional unit, the Application. No business logic should be presented here, but there might be 
@@ -56,4 +56,4 @@ needs. The main purpose is to connect things and point them to right location, s
 is responsible for choosing the activity (via `ActionDelegate`) as well as for the fragment 
 (via `ActionHandler`).
 
-This module depends on all other modules and others **must not** depend on `:app`!!!
+This module depends on all other modules and others **must not** depend on `:app`!
