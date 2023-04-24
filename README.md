@@ -312,8 +312,8 @@ flowchart TD
         QC{Drop\ncurrent screen?};
         QM{Drop\nmore screens?};
         QA{Drop\nall screens?};
-        N["Navigator.navigate(out Action)"];
-        NR["Navigator.navigate(out RootAction)"];
+        N["navigate(out Action)"];
+        NR["navigate(out RootAction)"];
         F["finishFragment(out Action)"];
         FE["finishFragment()"];
         QC --"no"--> N
@@ -326,7 +326,7 @@ flowchart TD
 ```
 
 >`NavHostFragment` also provides implementation of `FragmentNavigator` that consolidates both ways
-> of UI navigation to one component.
+> of UI navigation to one component. So it has both `navigate` and `finishFragment`.
 
 ### Map usage
 This isn't implemented, but the map is meant to be hosted in `NavHostFragment` and all the 
