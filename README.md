@@ -24,14 +24,14 @@ graph TD;
     feature-->core;
 ```
 
-### `:core-navigation`
+### Module `:core-navigation`
 `:core-navigation` module defines the basic structure of `Navigator`, `Action`, `Args` and 
 `ActionDelegate`. The types other modules will depend on when navigating. 
 On the inner level it also implements notification to action transformation.
 
 This module is meant to be only propagated by the `:core` as it serves no real purpose on its own.
 
-### `:core`
+### Module `:core`
 This module provides a basic implementation of `:core-navigation` interfaces (especially in `blocks`
 package). And further defines more granular structures such as `ActionHandler`.
 `:core` module is also a host for the actual `Action` and `Args` implementations.
@@ -49,13 +49,13 @@ completely public for anyone.
 > internal state of the feature module directly, but rather through `Navigator` with **Top-Bottom** 
 > breakdown. This is also known as [**unidirectional data flow**](https://en.wikipedia.org/wiki/Unidirectional_Data_Flow_(computer_science)) 
 
-### `:feature`
+### Module `:feature`
 Is the actual place, where all the business related code should sit. Apart from a requirement to 
 implement the `NavHostFragmet`, there are no other restrictions.
 
 From the dependency perspective this **must** depend on the `:core`.
 
-### `:app`
+### Module `:app`
 The last module that defines how to put everything together. It gives the actual implementations 
 of all the abstraction from `:core`, `:core-navigation` and `:feature` and connects them to one 
 functional unit, the Application. No business logic should be presented here. The main purpose is 
@@ -155,12 +155,12 @@ classDiagram
     FeatureFragment --> Navigator
 ```
 
-### `Navigator`
+### Navigator
 Is the core api of the solution. It serves as a accessor for `Action`s producers. It also allows to
 create `PendingIntent` for notification purposes it will then consume and automatically navigate
 when fired.
 
-### `Action` & `Args`
+### Action & Args
 Are another core apis, defining what suppose to be done and what params are required for that.
 It isn't functional, the action definition is by existence (unlike the UseCase way). Thus name
 should contain short and descriptive sentence of what it suppose to do (`OpenRoutePlannerAction`, 
@@ -200,7 +200,7 @@ if needed. But it's not really recommended.
 > automatically propagated from the sealed class. So the 2nd approach is more flexible, but also 
 > generates a lot of actions. The 1st is likely a perfect option for flows with multiple steps.
 
-### `ActionHandler`
+### ActionHandler
 Interface for determining `NavHostFragment` -- the receiver of the `Action`. There is a
 restriction that `Action` can be presented in exactly one `ActionHandler`. If two fragments wants to
 implement the same functionality, it must be defined as two different actions. On the other hand, 
@@ -214,7 +214,7 @@ one is wrong.)
 > any way (only used). This implies existence of `Action`s that will not be have any UI, thus won't
 > be contained in any `ActionHandler`.
 
-### `ActionsDelegate`
+### ActionsDelegate
 Is an interface defined in `:core-navigation` module and implemented within `:app` module. It's 
 purpose is kinda back door to allow navigating to `Action`s that does not have `ActionHandler`.
 It might be used for starting Activities, that do not implement `NavHostActivity` and live on its
@@ -226,45 +226,30 @@ own. In other words, the Android's settings intent can be navigated like that.
 > consumed by non-UI handler, modify data, which might end up in repository data emit, that the UI
 > is already attached to.
 
-### `ActionHandlersManager`
+### ActionHandlersManager
 Consolidates `ActionHandler`s into one searchable component used by the `NavHostActivity` for 
 starting handling fragments and managing their lifecycle.
 
-### `NavHostActivity`
+### NavHostActivity
 Contains the functionality around navigation. The base concept is fragments used through 
 `FragmentManager`. And also `launchMode="singleInstance"` in the Manifest as the core of the 
 functionality is based on `onNewIntent`'s receive of navigation `Action`s. The whole concept will be 
 explained more in depth later.
 
-### `FragmentContainer`
+### FragmentContainer
 Mimics the basic behaviour of `Activity` and `startActivityForResult`. Most of the fragments will
 be used as a part of stateful flows and thus there must be always `back` & `forward` ways. While the
 `Navigator` is the forward navigator only (!by implementation, not by concept!), the complement is
 the `FragmentContainer`. `finishFragment` without action is simple 'back'. With action it's 
 `replace` or `popUpTo` depending if the `Action`'s handler is somewhere in the backstack already.
 
-### `NavHostFragment`
+### NavHostFragment
 Serves the role of UI host container. The only thing is to implement method `handle(Action)` by
 update of the UI based on navigation args. For legacy code, this is likely to be invoked only once.
 For newer screens there is also `NavHostComposeFragment` that requires implementing class to provide
 `@Composable` method (once) and pass the `StateFlow<Action>` that can be used in compose normally.
 For most cases, this would be the place, where the `Action` should be transformed to some compose 
 `NavHostController` and implement it's own stack. 
-
-## Hilt
-The whole project uses hilt for DI. But at the same time DI is just used, it doesn't need to be Hilt
-but it has to support base nav schema of this solution through [SavedStateHandle](https://developer.android.com/training/dependency-injection/hilt-jetpack#viewmodels).
-Apart from that no restrictions on DI are established. The Hilt was chosen because it plays nicely 
-with compose and is able to do VM automatically. It also provides compile-time safety.
-
-> Former architecture relies on `@Assisted` VM's, which is somewhat not really suitable approach. 
-> We want VM's to be persisted, reused if possible, so this should be driven by some Fragment 
-> Arguments, not really some other objects. Since the Fragments now parametrizes the VM's through
-> SavedStateHandle, there is no real need for VM.Factory patterns.
-> Although historically there will be a case since the Fragments might be functional from legacy 
-> pov. But if the aim is to go to Compose+VM, fragments will be only hosts of the Screen, not even 
-> providing the VM's directly as that can be done in @Compose already. Thus @VM.Factory is somewhat
-> deprecated for this architecture already.
 
 ## Principles
 It was already mentioned, this architecture goes way beyond just UI navigation, but touches also 
@@ -319,6 +304,51 @@ current fragment. It can then use the provided Action (if provided) to navigate 
 > On the other hand, this is also UI only thus shouldn't be in the `Navigator` either.
 > So definitely place for future improvements if required.
 
+#### UI navigation decision tree
+Following diagram displays, which kind of navigation should be used in which case.
+```mermaid
+flowchart TD
+    subgraph NavHostFragmentImpl
+        QC{Drop\ncurrent screen?};
+        QM{Drop\nmore screens?};
+        QA{Drop\nall screens?};
+        N["Navigator.navigate(out Action)"];
+        NR["Navigator.navigate(out RootAction)"];
+        F["finishFragment(out Action)"];
+        FE["finishFragment()"];
+        QC --"no"--> N
+        QC --"yes"--> QM
+        QM --"no"--> FE
+        QM --"yes"--> QA
+        QA --"no"--> F
+        QA --"yes"--> NR
+    end
+```
+
+>`NavHostFragment` also provides implementation of `FragmentNavigator` that consolidates both ways
+> of UI navigation to one component.
+
+### Map usage
+This isn't implemented, but the map is meant to be hosted in `NavHostFragment` and all the 
+animations on partial views above should be made in compose. So activity stays dummy, only the 
+`NavHostFragment` holds the map and displays above. This likely leads to better separation of 
+concerns as the map will become local only for one feature.
+
+### Hilt
+The whole project uses hilt for DI. But at the same time DI is just used, it doesn't need to be Hilt
+but it has to support base nav schema of this solution through [SavedStateHandle](https://developer.android.com/training/dependency-injection/hilt-jetpack#viewmodels).
+Apart from that no restrictions on DI are established. The Hilt was chosen because it plays nicely
+with compose and is able to do VM automatically. It also provides compile-time safety.
+
+> Former architecture relies on `@Assisted` VM's, which is somewhat not really suitable approach.
+> We want VM's to be persisted, reused if possible, so this should be driven by some Fragment
+> Arguments, not really some other objects. Since the Fragments now parametrizes the VM's through
+> SavedStateHandle, there is no real need for VM.Factory patterns.
+> Although historically there will be a case since the Fragments might be functional from legacy
+> pov. But if the aim is to go to Compose+VM, fragments will be only hosts of the Screen, not even
+> providing the VM's directly as that can be done in @Compose already. Thus @VM.Factory is somewhat
+> deprecated for this architecture already.
+
 ### Animations
 Only supported animations are fragment transitions. Unfortunately they kind of doesn't work when
 navigating from/to compose implementation. Not really sure where the issue lies. When this was
@@ -326,4 +356,29 @@ attempted to reproduce for reporting to google, it did work on the sample projec
 should be doable, although buggy right now.
 
 ## How to start?
-TODO
+### UI based Action
+1. Begin with definition of both `Action` and `Args` in `:core` module,
+2. Create new `:feature` module with `NavHostFragment` implementation that will consume the action,
+3. Follow with implementation of `ActionHandler` in `:app` module,
+4. Now you are ready to call `Navigator.navigate(NewAction)` and let the `:feature` to handle UI.
+
+### Data based Action
+(This isn't implemented anywhere, not really a goal of this poc, only possibility)
+1. Begin with definition of both `Action` and `Args` in `:core` module,
+2. Update `ActionDelegate` implementation in `:app` to point at a consumer of the action,
+3. Make sure the `Action` is consumed and its result is propagated (updates some repo, that current ui subscribes, etc),
+4. Now you are ready to call `Navigator.navigate(NewAction)` and that's it.
+
+# Future steps
+The original idea was to be able to migrate to 'single activity' compose approach. So once all ui
+is in compose, it will be possible to cut the fragment thing out. Both `NavHostActivity` and
+`NavHostFragment` will no longer be needed. There will be a new activity that will do partially 
+both. Receiving the action through `onNewIntent` and transforming if to the compose world.
+This will potentially lead in all screens being hosted inside the this new activity (which will be
+located in `:app`). To avoid this one big 'navigational' activity it would be best to follow 
+[official recommendations](https://developer.android.com/guide/navigation/navigation-type-safety) 
+and use the `NavGraphBuilder.navigation` to keep features in their modules end expose only the 
+navigable entry point without really exposing the UI and dependencies itself.
+
+This is really hard to estimate where market will be at a time of this concept being fully
+integrated. So only future can tell.
