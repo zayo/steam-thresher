@@ -6,7 +6,7 @@ The main idea of this architecture is to create layered navigation that will all
 world's Single Activity approach, but also won't require to necessarily convert everything to 
 compose just yet. The fragments in this solution serves mainly as loose coupled containers that 
 communicates with the rest of the app through `Navigator`. That further supports the unidirectional 
-data flow, that is base of the compose world.
+data flow, which is fundamental for the compose world.
 
 ## Modules
 The modules architecture is based on this model:
@@ -32,7 +32,7 @@ On the inner level it also implements notification to action transformation.
 This module is meant to be only propagated by the `:core` as it serves no real purpose on its own.
 
 ### Module `:core`
-This module provides a basic implementation of `:core-navigation` interfaces (especially in `blocks`
+provides a basic implementation of `:core-navigation` interfaces (especially in `blocks`
 package). And further defines more granular structures such as `ActionHandler`.
 `:core` module is also a host for the actual `Action` and `Args` implementations.
 
@@ -53,7 +53,7 @@ completely public for anyone.
 Is the actual place, where all the business related code should sit. Apart from a requirement to 
 implement the `NavHostFragmet`, there are no other restrictions.
 
-From the dependency perspective this **must** depend on the `:core`.
+From the dependency perspective this module **must** depend on the `:core`.
 
 ### Module `:app`
 The last module that defines how to put everything together. It gives the actual implementations 
@@ -156,13 +156,13 @@ classDiagram
 ```
 
 ### Navigator
-Is the core api of the solution. It serves as a accessor for `Action`s producers. It also allows to
-create `PendingIntent` for notification purposes it will then consume and automatically navigate
+Is the core api of the solution. It serves as an accessor for `Action`s producers. It also allows 
+to create `PendingIntent` for notification purposes it will then consume and automatically navigate
 when fired.
 
 ### Action & Args
 Are another core apis, defining what suppose to be done and what params are required for that.
-It isn't functional, the action definition is by existence (unlike the UseCase way). Thus name
+It isn't functional. The action definition is by existence (unlike the UseCase way). Thus name
 should contain short and descriptive sentence of what it suppose to do (`OpenRoutePlannerAction`, 
 `StartBroadcastAction`, etc.)
 
@@ -171,7 +171,7 @@ have to be `@Parcelable` since they are passed through intents. Technically it c
 if needed. But it's not really recommended.
 
 > This concept is mostly logical and trying to be type-safe. If you think about it more in-dept,
-> you'll notice, the both `Action` and `Args` are somewhat the same thing.
+> you'll notice that both `Action` and `Args` are somewhat the same thing.
 > It might be tempting to confuse this two patterns then:
 > ```kotlin
 > @Parcelize
@@ -192,27 +192,28 @@ if needed. But it's not really recommended.
 > class OpenTaxiDetailAction(args: IdArgs) : Action<IdArgs>(args)
 > class OpenDeliveryDetailAction(args: IdArgs) : Action<IdArgs>(args)
 >```
-> They represent the same thing. Neither one is wrong. Both have its uses and it depends case by 
-> case. That might be a good lead which to choose is the alignment with implementation.
-> If there is only tiny difference and it will be always handled from one module, both are ok.
-> But if there is a chance of having both implementations in different modules, the 1st option would
-> be too tight, and also demanding Taxi impl to know there is an `DetailType.Delivery` as this is 
-> automatically propagated from the sealed class. So the 2nd approach is more flexible, but also 
-> generates a lot of actions. The 1st is likely a perfect option for flows with multiple steps.
+> Both represent the same thing. Neither one is wrong. Both have its uses and it depends case by 
+> case. What might be a good lead which to choose is the alignment with implementation.
+> If there is only tiny difference (Like the detail of Taxi vs Delivery) and it will be always 
+> handled from one module, both are ok. But if there is a chance of having both implementations 
+> in different modules, the 1st option would be too tight, and would demand Taxi impl to know
+> there is an `DetailType.Delivery` as this is automatically propagated from the sealed class.
+> So the 2nd approach is more flexible, but also generates a lot of actions. The 1st is likely a
+> perfect option for flows with multiple steps.
 
 ### ActionHandler
 Interface for determining `NavHostFragment` -- the receiver of the `Action`. There is a
 restriction that `Action` can be presented in exactly one `ActionHandler`. If two fragments wants to
 implement the same functionality, it must be defined as two different actions. On the other hand, 
-it's not a problem to have `NavHostFragment` in multiple `ActionHandler`s though. (Depends if the 
-`ActionHandler` represents logical group of actions or abilities of one `NavHostFragment`. Neither
-one is wrong.) 
+it's not a problem to have the same `NavHostFragment` in multiple `ActionHandler`s though. (Depends 
+if the `ActionHandler` represents logical group of actions or abilities of one `NavHostFragment`. 
+Neither one is wrong.) 
 
 > `ActionHandler` is defined in `:core` module (not in `:core-navigation`) intentionally. It's 
 > existence is required only by `NavHostActivity` to find a correct `NavHostFragment` with required 
-> `Action`. Focused read could notice, the `Action` is generic object, not tied to `Navigation` in 
-> any way (only used). This implies existence of `Action`s that will not be have any UI, thus won't
-> be contained in any `ActionHandler`.
+> `Action`. Focused reader could notice, the `Action` is generic object, not tied to UI navigation
+> in any way (only used). This implies existence of `Action`s that will not have any UI, thus 
+> won't be contained in any `ActionHandler`.
 
 ### ActionsDelegate
 Is an interface defined in `:core-navigation` module and implemented within `:app` module. It's 
@@ -239,9 +240,12 @@ explained more in depth later.
 ### FragmentContainer
 Mimics the basic behaviour of `Activity` and `startActivityForResult`. Most of the fragments will
 be used as a part of stateful flows and thus there must be always `back` & `forward` ways. While the
-`Navigator` is the forward navigator only (!by implementation, not by concept!), the complement is
+`Navigator` is the forward navigator only (**by implementation, not by concept**), the complement is
 the `FragmentContainer`. `finishFragment` without action is simple 'back'. With action it's 
 `replace` or `popUpTo` depending if the `Action`'s handler is somewhere in the backstack already.
+
+This is implemented by the `NavHostActivity` and serves the purpose of activity-fragment callbacks 
+api.
 
 ### NavHostFragment
 Serves the role of UI host container. The only thing is to implement method `handle(Action)` by
@@ -249,11 +253,11 @@ update of the UI based on navigation args. For legacy code, this is likely to be
 For newer screens there is also `NavHostComposeFragment` that requires implementing class to provide
 `@Composable` method (once) and pass the `StateFlow<Action>` that can be used in compose normally.
 For most cases, this would be the place, where the `Action` should be transformed to some compose 
-`NavHostController` and implement it's own stack. 
+`NavHostController` and implement it's own stack & route translation. 
 
 ## Principles
-It was already mentioned, this architecture goes way beyond just UI navigation, but touches also 
-some MVI functionality to support the case. 
+This architecture goes way beyond just UI navigation, but touches also some MVI functionality to
+support the case. 
 
 `ActionDelegate` provides an `Action` consumer. From it's nature, it's not restricted to UI, and 
 can provide any kind of handler. **`NavHostActivity` is the first implementation of the 
@@ -280,6 +284,8 @@ the `RootAction` suppose to be used to 'restart' application's ui stack.
 > Do not create other marker interfaces for things like this. It's not justified by any means.
 > If the `DataAction` split will be required, it would be better to split `Action` for `NavAction`
 > consumed by `NavHostActivity` only and then `DataAction` for non-UI consumptions.
+> For the sake of consistency it might make sense to use `Navigator` only for UI and somewhat 
+> replicate the same thing for the Data consumption to not mix them together. Caution!
 
 #### Forward `Navigator`
 The consumption of `Navigator` in `NavHostActivity` denotes that the use case is forward only. This 
@@ -289,8 +295,9 @@ appropriate method. There is no way how to 'undo' an `Action` from `Navigator`. 
 consumed and cannot be reverted. Instead there is an 'Backward' way to be used.
 
 > You might noticed that there is a backStack of `NavHostFragment`s, but if one fragment received
-> second `Action` it won't navigate to first if back is pressed. In that case another 
-> `NavHostFragment` has to be used, to present the consumer of Action in the back stack hierarchy.
+> second `Action` it won't navigate to first if back is pressed. In that case two different 
+> `NavHostFragment`s has to be used, to present each consumer of `Action` in the back stack 
+> hierarchy.
 
 #### Backward `FragmentContainer.finishFragment()`
 Complementary to `Navigator`'s `navigate(Action)` there is the `FragmentContainer` and its  
@@ -298,14 +305,15 @@ Complementary to `Navigator`'s `navigate(Action)` there is the `FragmentContaine
 implemented by the `NavHostActivity` that uses it only internally (thus its also available only 
 within `NavHostFragment` as it's entirely for the UI only). The difference is, that apart from 
 `navigate` this allows `NavHostFragment` to tell the `NavHostActivity` that it suppose to pop 
-current fragment. It can then use the provided Action (if provided) to navigate elsewhere.
+current fragment. It can then use the provided `Action` (if provided) to navigate elsewhere.
 
-> This is kind of goes against unidirectional principle as not all actions goes through `Navigator`.
-> On the other hand, this is also UI only thus shouldn't be in the `Navigator` either.
-> So definitely place for future improvements if required.
+> This is kind of goes against unidirectional principle as not all actions goes through `Navigator` 
+> then. On the other hand, this is also UI only thus shouldn't be in the `Navigator` either.
+> **So definitely place for future improvements if required.**
 
 #### UI navigation decision tree
-Following diagram displays, which kind of navigation should be used in which case.
+Following diagram displays, which kind of navigation should be used in which case. Diagram is 
+applicable in any `NavHostFragment` implementation at a time when navigating suppose to happen.
 ```mermaid
 flowchart TD
     subgraph NavHostFragmentImpl
@@ -327,6 +335,12 @@ flowchart TD
 
 >`NavHostFragment` also provides implementation of `FragmentNavigator` that consolidates both ways
 > of UI navigation to one component. So it has both `navigate` and `finishFragment`.
+
+Few more restriction applies here:
+1. It's forbidden to call `finish(out Action)` if the displayed screen is the only screen in 
+hierarchy. But it's allowed to call `finish(out RootAction)`.
+2. It's forbidden to call `finish(out Action)` if the new `Action` suppose to be handled by the 
+same `NavHostFragment` that suppose to be finished. This essentially means `navigate(out Action)`. 
 
 ### Map usage
 This isn't implemented, but the map is meant to be hosted in `NavHostFragment` and all the 
@@ -356,17 +370,17 @@ attempted to reproduce for reporting to google, it did work on the sample projec
 should be doable, although buggy right now.
 
 ## How to start?
-### UI based Action
 1. Begin with definition of both `Action` and `Args` in `:core` module,
 2. Create new `:feature` module with `NavHostFragment` implementation that will consume the action,
 3. Follow with implementation of `ActionHandler` in `:app` module,
 4. Now you are ready to call `Navigator.navigate(NewAction)` and let the `:feature` to handle UI.
 
-### Data based Action
-(This isn't implemented anywhere, not really a goal of this poc, only possibility)
+#### Data based Action
+> This isn't implemented anywhere, not really a goal of this poc, only possibility.
 1. Begin with definition of both `Action` and `Args` in `:core` module,
 2. Update `ActionDelegate` implementation in `:app` to point at a consumer of the action,
-3. Make sure the `Action` is consumed and its result is propagated (updates some repo, that current ui subscribes, etc),
+3. Make sure the `Action` is consumed and its result is propagated (updates some repo, that 
+current ui subscribes, etc),
 4. Now you are ready to call `Navigator.navigate(NewAction)` and that's it.
 
 # Future steps
@@ -380,5 +394,5 @@ located in `:app`). To avoid this one big 'navigational' activity it would be be
 and use the `NavGraphBuilder.navigation` to keep features in their modules end expose only the 
 navigable entry point without really exposing the UI and dependencies itself.
 
-This is really hard to estimate where market will be at a time of this concept being fully
+It is really hard to estimate where market will be at a time of this concept being fully
 integrated. So only future can tell.
