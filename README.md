@@ -1,7 +1,5 @@
 # Steam Thresher ([wiki](https://en.wikipedia.org/wiki/Threshing_machine))
 
-PoC for https://liftago.atlassian.net/browse/LTG-18055 and https://liftago.atlassian.net/browse/LTG-18097
-
 The main idea of this architecture is to create layered navigation that will allow to use compose 
 world's Single Activity approach, but also won't require to necessarily convert everything to 
 compose just yet. The fragments in this solution serves mainly as loose coupled containers that 
